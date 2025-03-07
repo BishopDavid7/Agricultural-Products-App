@@ -1,27 +1,31 @@
-Here is a **detailed `README.md`** file for your **Agricultural Products App**, including an **architectural diagram** reference.  
-
----
+# README.md file for the Agricultural Products App
 
 # 🌾 **Agricultural Products App**  
 
 ## 📌 **Project Overview**  
-The **Agricultural Products App** is a **mobile and Progressive Web Application (PWA)** that enables **local farmers in Cameroon** to **advertise their agricultural products** while allowing buyers to browse, place orders, and complete transactions through **MTN Mobile Money and Orange Money**.  
+The **Agricultural Products App** is a **mobile and Progressive Web Application (PWA)** designed to help **local farmers in Cameroon** **advertise their agricultural products**, while enabling buyers to browse, place orders, and make payments via **MTN Mobile Money and Orange Money**.  
 
-This app is built using **AWS Free Tier services**, providing a scalable, secure, and cost-effective infrastructure.  
-
-## 🎯 **Key Features**  
-✅ **Farmer Registration & Authentication** – Farmers can create accounts and manage their product listings.  
-✅ **Product Listings** – Farmers can upload product details, images, and pricing.  
-✅ **Order Management** – Buyers can place orders and choose between pickup or delivery.  
-✅ **Mobile Money Payments** – Secure transactions via **MTN MoMo & Orange Money**.  
-✅ **Real-Time Notifications** – SMS notifications for order confirmations, payments, and deliveries.  
-✅ **Scalable & Secure Architecture** – Built on AWS Free Tier with **serverless backend** and **GraphQL APIs**.  
+This project utilizes **AWS Free Tier services**, ensuring a **scalable, secure, and cost-effective infrastructure**.  
 
 ---
 
 ## 🏗️ **Architecture Diagram**  
 
-![Agricultural App Architecture](C:/Users/PRO%20ELECTRONIC/Pictures/aws.diagrams/AgriculturalAppProject2.png)  
+Below is the architectural diagram of the application:  
+
+![Agricultural App Architecture](./docs/AgriculturalAppProject2.png)  
+
+> **Note:** Ensure `AgriculturalAppProject2.png` is located inside the `docs/` folder in your repository for proper visibility.
+
+---
+
+## 🎯 **Key Features**  
+✅ **User Registration & Authentication** – Secure signup/login for farmers and buyers.  
+✅ **Product Listings** – Farmers can post product details, images, and pricing.  
+✅ **Order Management** – Buyers can place orders and select pickup or delivery.  
+✅ **Mobile Money Payments** – Secure payments via **MTN MoMo & Orange Money**.  
+✅ **Real-Time Notifications** – SMS notifications for order confirmations and updates.  
+✅ **AWS-Powered Infrastructure** – Secure, scalable, and cost-effective using **serverless architecture**.  
 
 ---
 
@@ -39,15 +43,15 @@ This app is built using **AWS Free Tier services**, providing a scalable, secure
 - **Amazon S3** – Image storage for product photos  
 
 ### 💳 **Payment Integration**  
-- **MTN MoMo API** – Secure mobile money payments  
+- **MTN MoMo API** – Secure mobile money transactions  
 - **Orange Money API** – Alternative payment processing  
 
 ### 📡 **Notifications & Messaging**  
-- **Amazon SNS** – SMS alerts for order confirmations and updates  
+- **Amazon SNS** – SMS alerts for order confirmations and status updates  
 
 ---
 
-## 🏗️ **Project Structure**  
+## 📁 **Project Structure**  
 
 ```
 Agricultural-Products-App/
@@ -73,6 +77,8 @@ Agricultural-Products-App/
 │   ├── public/
 │   ├── index.js
 │── amplify/ (AWS Amplify Project)
+│── docs/
+│   ├── AgriculturalAppProject2.png   <-- (Architecture Diagram)
 │── README.md
 ```
 
@@ -106,7 +112,7 @@ amplify push
 ```
 
 ### 🔧 **4. Configure Environment Variables**  
-Create a `.env` file in the `backend/` folder with:  
+Create a `.env` file in the `backend/` folder and add:  
 ```
 MTN_MOMO_API_KEY=your_api_key
 ORANGE_MONEY_API_KEY=your_api_key
@@ -128,9 +134,9 @@ npm start
 ---
 
 ## 🏆 **Project Goals & Impact**  
-📢 **Empower Local Farmers** – Give farmers a digital platform to sell their products.  
-💰 **Facilitate Mobile Payments** – Enable seamless transactions using mobile money.  
-🚀 **Scalable Solution** – Built on AWS for high availability and performance.  
+📢 **Empower Local Farmers** – Provide farmers with a digital platform to sell their produce.  
+💰 **Facilitate Mobile Payments** – Secure transactions using **MTN MoMo & Orange Money**.  
+🚀 **Scalable Solution** – Built on **AWS for high availability and cost-efficiency**.  
 
 ---
 
@@ -148,4 +154,8 @@ npm start
 🐙 **GitHub**: [BishopDavid7](https://github.com/BishopDavid7)  
 🔗 **LinkedIn**: [Pascal E. Ekenya Fonjock](https://www.linkedin.com/in/pascal-e-ekenya-fonjock-32151045)  
 
-Let’s build something great together! 🚀🌍
+> **Let’s build something great together!** 🚀🌍  
+
+---
+
+
