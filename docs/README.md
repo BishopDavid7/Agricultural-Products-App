@@ -12,10 +12,9 @@ This project utilizes **AWS Free Tier services**, ensuring a **scalable, secure,
 🏗️ Architecture Diagram
 Below is the architectural diagram of the application:
 
-https://github.com/BishopDavid7/Agricultural-Products-App/blob/main/docs/AgriculturalAppProject2.png
+## 📌 Architectural Diagram
+![Agricultural Products App Architecture](https://github.com/BishopDavid7/Agricultural-Products-App/blob/main/docs/AgriculturalAppProject2.png)
 
-https://github.com/BishopDavid7/Agricultural-Products-App/raw/main/docs/AgriculturalAppProject2.png
----
 
 ## 🎯 **Key Features**  
 ✅ **User Registration & Authentication** – Secure signup/login for farmers and buyers.  
