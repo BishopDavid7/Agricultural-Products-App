@@ -9,14 +9,12 @@ This project utilizes **AWS Free Tier services**, ensuring a **scalable, secure,
 
 ---
 
-## 🏗️ **Architecture Diagram**  
+🏗️ Architecture Diagram
+Below is the architectural diagram of the application:
 
-Below is the architectural diagram of the application:  
+https://github.com/BishopDavid7/Agricultural-Products-App/blob/main/docs/AgriculturalAppProject2.png
 
-![Agricultural App Architecture](./docs/AgriculturalAppProject2.png)  
-
-> **Note:** Ensure `AgriculturalAppProject2.png` is located inside the `docs/` folder in your repository for proper visibility.
-
+https://github.com/BishopDavid7/Agricultural-Products-App/raw/main/docs/AgriculturalAppProject2.png
 ---
 
 ## 🎯 **Key Features**  
