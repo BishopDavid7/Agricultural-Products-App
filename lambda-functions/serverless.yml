@@ -1,0 +1,44 @@
+service: agricultural-app
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+
+functions:
+  createUser:
+    handler: userHandler.createUser
+    events:
+      - http:
+          path: user
+          method: post
+  getUser:
+    handler: userHandler.getUser
+    events:
+      - http:
+          path: user/{userId}
+          method: get
+  createProduct:
+    handler: productHandler.createProduct
+    events:
+      - http:
+          path: product
+          method: post
+  getAllProducts:
+    handler: productHandler.getAllProducts
+    events:
+      - http:
+          path: products
+          method: get
+  placeOrder:
+    handler: orderHandler.placeOrder
+    events:
+      - http:
+          path: order
+          method: post
+  processMTNPayment:
+    handler: paymentHandler.processMTNPayment
+    events:
+      - http:
+          path: payment/mtn
+          method: post
