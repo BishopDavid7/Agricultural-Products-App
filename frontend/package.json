@@ -1,0 +1,40 @@
+{
+    "name": "agricultural-products-app",
+    "version": "1.0.0",
+    "description": "A React and AWS Amplify-based Agricultural Products App for farmers in Cameroon",
+    "main": "index.js",
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "dependencies": {
+      "@aws-amplify/ui-react": "^3.0.10",
+      "aws-amplify": "^5.0.4",
+      "graphql": "^16.6.0",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-router-dom": "^6.12.1",
+      "styled-components": "^6.0.3"
+    },
+    "devDependencies": {
+      "eslint": "^8.51.0",
+      "prettier": "^3.2.5"
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    },
+    "author": "Your Name",
+    "license": "MIT"
+  }
+  
