@@ -1,0 +1,53 @@
+type User {
+  userId: ID!
+  name: String!
+  email: String!
+  role: String!
+  createdAt: String!
+}
+
+type Product {
+  productId: ID!
+  name: String!
+  price: Float!
+  category: String!
+  imageUrl: String
+  createdAt: String!
+}
+
+type Order {
+  orderId: ID!
+  userId: ID!
+  products: [Product]!
+  totalAmount: Float!
+  paymentStatus: String!
+  orderStatus: String!
+  createdAt: String!
+}
+
+type PaymentResponse {
+  status: String!
+  transactionId: String!
+  message: String!
+}
+
+# Queries
+type Query {
+  getUser(userId: ID!): User
+  getAllProducts: [Product]
+  getOrder(orderId: ID!): Order
+}
+
+# Mutations
+type Mutation {
+  createUser(name: String!, email: String!, role: String!): User
+  createProduct(name: String!, price: Float!, category: String!, imageUrl: String): Product
+  placeOrder(userId: ID!, products: [ID!]!, totalAmount: Float!): Order
+  processMTNPayment(userId: ID!, amount: Float!, phoneNumber: String!): PaymentResponse
+  processOrangePayment(userId: ID!, amount: Float!, phoneNumber: String!): PaymentResponse
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}

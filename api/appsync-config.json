@@ -1,0 +1,38 @@
+{
+    "service": "appsync",
+    "provider": "aws",
+    "name": "AgriculturalAppAPI",
+    "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+    "schemaPath": "backend/api/schema.graphql",
+    "dataSources": [
+      {
+        "type": "AWS_LAMBDA",
+        "name": "UserLambda",
+        "config": {
+          "functionName": "AgriculturalApp-UserHandler"
+        }
+      },
+      {
+        "type": "AWS_LAMBDA",
+        "name": "ProductLambda",
+        "config": {
+          "functionName": "AgriculturalApp-ProductHandler"
+        }
+      },
+      {
+        "type": "AWS_LAMBDA",
+        "name": "OrderLambda",
+        "config": {
+          "functionName": "AgriculturalApp-OrderHandler"
+        }
+      },
+      {
+        "type": "AWS_LAMBDA",
+        "name": "PaymentLambda",
+        "config": {
+          "functionName": "AgriculturalApp-PaymentHandler"
+        }
+      }
+    ]
+  }
+  
