@@ -1,4 +1,6 @@
-Here's your updated **README.md** file, incorporating the revised project structure and CloudFormation template:  
+### **Updated README.md with Docker Deployment Option**  
+
+Here's your **README.md** with the **Docker deployment instructions** added.  
 
 ---
 
@@ -88,6 +90,9 @@ Agricultural-Products-App/
 │── .github/  
 │   ├── workflows/                   # (Optional) CI/CD GitHub Actions
 │── README.md                        # Project Documentation
+│── docker-compose.yml               # Docker Compose for Multi-Service Deployment
+│── Dockerfile.backend               # Dockerfile for Backend
+│── Dockerfile.frontend              # Dockerfile for Frontend
 ```
 
 ---
@@ -141,6 +146,93 @@ npm start
 
 ---
 
+## 🐳 **Deploying with Docker**  
+
+### **1️⃣ Install Docker & Docker Compose**  
+Ensure you have **Docker** installed on your system:  
+👉 [Download Docker](https://www.docker.com/get-started)  
+
+### **2️⃣ Build & Run with Docker Compose**  
+
+#### **Docker Compose File (`docker-compose.yml`)**
+```yaml
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+```
+
+#### **Dockerfile for Backend (`Dockerfile.backend`)**
+```dockerfile
+# Use official Node.js image
+FROM node:18
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose port and start server
+EXPOSE 4000
+CMD ["npm", "start"]
+```
+
+#### **Dockerfile for Frontend (`Dockerfile.frontend`)**
+```dockerfile
+# Use official Node.js image
+FROM node:18
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose port and start app
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+### **3️⃣ Build & Run the Containers**
+Run the following command to build and start the app using Docker Compose:  
+```bash
+docker-compose up --build -d
+```
+
+To stop the containers:  
+```bash
+docker-compose down
+```
+
+---
+
 ## 🏗 **Deploying with AWS CloudFormation**  
 
 1. **Navigate to the `infrastructure/` directory**  
@@ -161,22 +253,6 @@ npm start
    ```bash
    aws cloudformation describe-stacks --stack-name AgriAppStack --query "Stacks[0].Outputs"
    ```
-
----
-
-## 🏆 **Project Goals & Impact**  
-📢 **Empower Local Farmers** – Provide farmers with a digital platform to sell their produce.  
-💰 **Facilitate Mobile Payments** – Secure transactions using **MTN MoMo & Orange Money**.  
-🚀 **Scalable Solution** – Built on **AWS for high availability and cost-efficiency**.  
-
----
-
-## 🤝 **Contributing**  
-1. Fork the repository.  
-2. Create a feature branch: `git checkout -b feature-name`.  
-3. Commit changes: `git commit -m "Add new feature"`.  
-4. Push to the branch: `git push origin feature-name`.  
-5. Submit a pull request.  
 
 ---
 
