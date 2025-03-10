@@ -1,4 +1,6 @@
-# README.md file for the Agricultural Products App
+Here's your updated **README.md** file, incorporating the revised project structure and CloudFormation template:  
+
+---
 
 # 🌾 **Agricultural Products App**  
 
@@ -9,12 +11,12 @@ This project utilizes **AWS Free Tier services**, ensuring a **scalable, secure,
 
 ---
 
-🏗️ Architecture Diagram
-Below is the architectural diagram of the application:
+## 🏗 **Architectural Diagram**  
+Below is the architectural diagram of the application:  
 
-## 📌 Architectural Diagram
-![Agricultural Products App Architecture](https://github.com/BishopDavid7/Agricultural-Products-App/blob/main/docs/AgriculturalAppProject2.png)
+![Agricultural Products App Architecture](https://github.com/BishopDavid7/Agricultural-Products-App/blob/main/docs/AgriculturalAppProject2.png)  
 
+---
 
 ## 🎯 **Key Features**  
 ✅ **User Registration & Authentication** – Secure signup/login for farmers and buyers.  
@@ -53,19 +55,21 @@ Below is the architectural diagram of the application:
 ```
 Agricultural-Products-App/
 │── backend/
-│   ├── controllers/
+│   ├── controllers/              # API Controllers
 │   │   ├── userController.js
 │   │   ├── productController.js
 │   │   ├── orderController.js
-│   ├── models/
+│   ├── models/                   # Database Models
 │   │   ├── User.js
 │   │   ├── Product.js
 │   │   ├── Order.js
-│   ├── routes/
+│   ├── routes/                    # API Routes
 │   │   ├── userRoutes.js
 │   │   ├── productRoutes.js
 │   │   ├── orderRoutes.js
-│   ├── server.js
+│   ├── lambda-functions/          # AWS Lambda Handlers
+│   ├── api/                       # AppSync GraphQL API
+│   ├── server.js                   # Express.js Server
 │── frontend/
 │   ├── src/
 │   │   ├── components/
@@ -73,10 +77,17 @@ Agricultural-Products-App/
 │   │   ├── services/
 │   ├── public/
 │   ├── index.js
-│── amplify/ (AWS Amplify Project)
-│── docs/
-│   ├── AgriculturalAppProject2.png   <-- (Architecture Diagram)
-│── README.md
+│   ├── package.json
+│── infrastructure/  
+│   ├── agri-app-template.yaml      # ✅ CloudFormation Template
+│   ├── deployment-scripts/         # (Optional) Deployment Scripts
+│   ├── README.md                   # Documentation for Infrastructure Setup
+│── amplify/                         # AWS Amplify Project
+│── docs/                             # Documentation and Diagrams
+│   ├── AgriculturalAppProject2.png  # Architecture Diagram
+│── .github/  
+│   ├── workflows/                   # (Optional) CI/CD GitHub Actions
+│── README.md                        # Project Documentation
 ```
 
 ---
@@ -130,6 +141,29 @@ npm start
 
 ---
 
+## 🏗 **Deploying with AWS CloudFormation**  
+
+1. **Navigate to the `infrastructure/` directory**  
+   ```bash
+   cd infrastructure
+   ```
+2. **Deploy the CloudFormation stack**  
+   ```bash
+   aws cloudformation create-stack --stack-name AgriAppStack \
+     --template-body file://agri-app-template.yaml \
+     --capabilities CAPABILITY_NAMED_IAM
+   ```
+3. **Monitor Stack Creation**  
+   ```bash
+   aws cloudformation describe-stacks --stack-name AgriAppStack
+   ```
+4. **Once the stack is successfully created, get the outputs to configure your app.**  
+   ```bash
+   aws cloudformation describe-stacks --stack-name AgriAppStack --query "Stacks[0].Outputs"
+   ```
+
+---
+
 ## 🏆 **Project Goals & Impact**  
 📢 **Empower Local Farmers** – Provide farmers with a digital platform to sell their produce.  
 💰 **Facilitate Mobile Payments** – Secure transactions using **MTN MoMo & Orange Money**.  
@@ -154,5 +188,4 @@ npm start
 > **Let’s build something great together!** 🚀🌍  
 
 ---
-
 
