@@ -1,0 +1,225 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CloudFormation Template to deploy the Agricultural Products App using AWS Free Tier.
+  Resources include S3, DynamoDB, AppSync, Cognito, Lambda, SNS, and IAM Roles.
+
+Resources:
+
+  ### S3 Bucket for Product Images ###
+  ProductImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "agricultural-app-product-images-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  ### DynamoDB Tables ###
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Users
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Products
+      AttributeDefinitions:
+        - AttributeName: productId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: productId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Orders
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  ### Cognito User Pool for Authentication ###
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: AgriculturalAppUserPool
+      AutoVerifiedAttributes:
+        - email
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: AgriculturalAppClient
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+
+  ### AWS Lambda Functions ###
+  OrderProcessingLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: OrderProcessingFunction
+      Handler: index.handler
+      Runtime: python3.8
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps('Order processed successfully!')
+              }
+      MemorySize: 128
+      Timeout: 10
+
+  ### IAM Role for Lambda ###
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaDynamoDBPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource:
+                  - !GetAtt OrdersTable.Arn
+
+  ### Amazon SNS for Notifications ###
+  OrderNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: OrderNotificationTopic
+      TopicName: OrderNotifications
+
+  ### AppSync API for GraphQL ###
+  GraphQLAPI:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: AgriculturalAppGraphQLAPI
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId: !Ref UserPool
+        AwsRegion: !Ref AWS::Region
+        DefaultAction: ALLOW
+
+  GraphQLSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt GraphQLAPI.ApiId
+      Definition: |
+        type User {
+          userId: ID!
+          name: String!
+          email: String!
+        }
+        type Product {
+          productId: ID!
+          name: String!
+          price: Float!
+          imageUrl: String
+        }
+        type Order {
+          orderId: ID!
+          userId: ID!
+          productId: ID!
+          status: String!
+        }
+        type Query {
+          getUser(userId: ID!): User
+          getProduct(productId: ID!): Product
+          getOrder(orderId: ID!): Order
+        }
+        type Mutation {
+          createUser(userId: ID!, name: String!, email: String!): User
+          createProduct(productId: ID!, name: String!, price: Float!, imageUrl: String): Product
+          createOrder(orderId: ID!, userId: ID!, productId: ID!, status: String!): Order
+        }
+        schema {
+          query: Query
+          mutation: Mutation
+        }
+
+  GraphQLDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQLAPI.ApiId
+      Name: DynamoDBDataSource
+      Type: AMAZON_DYNAMODB
+      DynamoDBConfig:
+        TableName: !Ref ProductsTable
+        AwsRegion: !Ref AWS::Region
+      ServiceRoleArn: !GetAtt AppSyncIAMRole.Arn
+
+  ### IAM Role for AppSync ###
+  AppSyncIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AppSyncIAMRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AppSyncDynamoDBPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource:
+                  - !GetAtt ProductsTable.Arn
+
+Outputs:
+  ProductImagesBucketName:
+    Value: !Ref ProductImagesBucket
+    Description: "S3 Bucket for product images"
+
+  GraphQLAPIEndpoint:
+    Value: !GetAtt GraphQLAPI.GraphQLUrl
+    Description: "GraphQL API Endpoint"
+
+  CognitoUserPoolId:
+    Value: !Ref UserPool
+    Description: "Cognito User Pool ID"
+
+  OrderNotificationTopicARN:
+    Value: !Ref OrderNotificationTopic
+    Description: "SNS Topic ARN for Order Notifications"
