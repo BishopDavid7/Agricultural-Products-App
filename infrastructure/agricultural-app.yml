@@ -1,59 +1,8 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: >
-  CloudFormation Template to deploy the Agricultural Products App using AWS Free Tier.
-  Resources include S3, DynamoDB, AppSync, Cognito, Lambda, SNS, and IAM Roles.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation template for Agricultural Products App using AWS Free Tier services."
 
 Resources:
-
-  ### S3 Bucket for Product Images ###
-  ProductImagesBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "agricultural-app-product-images-${AWS::AccountId}"
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-
-  ### DynamoDB Tables ###
-  UsersTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: Users
-      AttributeDefinitions:
-        - AttributeName: userId
-          AttributeType: S
-      KeySchema:
-        - AttributeName: userId
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-
-  ProductsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: Products
-      AttributeDefinitions:
-        - AttributeName: productId
-          AttributeType: S
-      KeySchema:
-        - AttributeName: productId
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-
-  OrdersTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: Orders
-      AttributeDefinitions:
-        - AttributeName: orderId
-          AttributeType: S
-      KeySchema:
-        - AttributeName: orderId
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-
-  ### Cognito User Pool for Authentication ###
+  # ✅ Amazon Cognito User Pool for Authentication
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -68,26 +17,45 @@ Resources:
       UserPoolId: !Ref UserPool
       GenerateSecret: false
 
-  ### AWS Lambda Functions ###
+  # ✅ AWS AppSync (GraphQL API) for Backend Queries
+  GraphQLAPI:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: AgriculturalProductsAPI
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId: !Ref UserPool
+        AwsRegion: !Ref "AWS::Region"
+        DefaultAction: ALLOW
+
+  # ✅ Amazon S3 Bucket for Product Images
+  ProductImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "agri-products-bucket-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+
+  # ✅ AWS Lambda Function for Backend Logic (Processing Orders)
   OrderProcessingLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: OrderProcessingFunction
-      Handler: index.handler
       Runtime: python3.8
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
       Code:
         ZipFile: |
           import json
-          def handler(event, context):
+          def lambda_handler(event, context):
               return {
-                  'statusCode': 200,
-                  'body': json.dumps('Order processed successfully!')
+                  "statusCode": 200,
+                  "body": json.dumps("Order Processed Successfully!")
               }
-      MemorySize: 128
-      Timeout: 10
+      Role: !GetAtt LambdaExecutionRole.Arn
 
-  ### IAM Role for Lambda ###
+  # ✅ Lambda Execution Role
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -100,126 +68,117 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: LambdaDynamoDBPolicy
+        - PolicyName: LambdaS3Access
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:PutItem
-                  - dynamodb:GetItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:DeleteItem
-                Resource:
-                  - !GetAtt OrdersTable.Arn
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${ProductImagesBucket}/*"
 
-  ### Amazon SNS for Notifications ###
-  OrderNotificationTopic:
+  # ✅ Amazon SNS for Order Notifications
+  OrderNotifications:
     Type: AWS::SNS::Topic
     Properties:
-      DisplayName: OrderNotificationTopic
-      TopicName: OrderNotifications
+      DisplayName: "Order Notifications"
+      TopicName: "AgriculturalOrdersTopic"
 
-  ### AppSync API for GraphQL ###
-  GraphQLAPI:
-    Type: AWS::AppSync::GraphQLApi
+  # ✅ AWS Amplify App for Frontend Hosting
+  AmplifyApp:
+    Type: AWS::Amplify::App
     Properties:
-      Name: AgriculturalAppGraphQLAPI
-      AuthenticationType: AMAZON_COGNITO_USER_POOLS
-      UserPoolConfig:
-        UserPoolId: !Ref UserPool
-        AwsRegion: !Ref AWS::Region
-        DefaultAction: ALLOW
+      Name: AgriculturalProductsApp
+      Repository: "https://github.com/your-repo/agri-app"
+      IAMServiceRole: !GetAtt AmplifyRole.Arn
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            build:
+              commands:
+                - npm install
+                - npm run build
+          artifacts:
+            baseDirectory: public
+            files:
+              - '**/*'
 
-  GraphQLSchema:
-    Type: AWS::AppSync::GraphQLSchema
-    Properties:
-      ApiId: !GetAtt GraphQLAPI.ApiId
-      Definition: |
-        type User {
-          userId: ID!
-          name: String!
-          email: String!
-        }
-        type Product {
-          productId: ID!
-          name: String!
-          price: Float!
-          imageUrl: String
-        }
-        type Order {
-          orderId: ID!
-          userId: ID!
-          productId: ID!
-          status: String!
-        }
-        type Query {
-          getUser(userId: ID!): User
-          getProduct(productId: ID!): Product
-          getOrder(orderId: ID!): Order
-        }
-        type Mutation {
-          createUser(userId: ID!, name: String!, email: String!): User
-          createProduct(productId: ID!, name: String!, price: Float!, imageUrl: String): Product
-          createOrder(orderId: ID!, userId: ID!, productId: ID!, status: String!): Order
-        }
-        schema {
-          query: Query
-          mutation: Mutation
-        }
-
-  GraphQLDataSource:
-    Type: AWS::AppSync::DataSource
-    Properties:
-      ApiId: !GetAtt GraphQLAPI.ApiId
-      Name: DynamoDBDataSource
-      Type: AMAZON_DYNAMODB
-      DynamoDBConfig:
-        TableName: !Ref ProductsTable
-        AwsRegion: !Ref AWS::Region
-      ServiceRoleArn: !GetAtt AppSyncIAMRole.Arn
-
-  ### IAM Role for AppSync ###
-  AppSyncIAMRole:
+  AmplifyRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: AppSyncIAMRole
+      RoleName: AmplifyExecutionRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
-              Service: appsync.amazonaws.com
+              Service: amplify.amazonaws.com
+            Action: sts:AssumeRole
+
+  # ✅ AWS CodeDeploy for CI/CD Deployment with AppDeploy
+  CodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: AgriAppDeployment
+      ComputePlatform: Server
+
+  CodeDeployGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployApplication
+      DeploymentGroupName: AgriAppDeployGroup
+      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+      DeploymentConfigName: CodeDeployDefault.OneAtATime
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+
+  CodeDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CodeDeployExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: AppSyncDynamoDBPolicy
+        - PolicyName: CodeDeployPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:Query
-                  - dynamodb:Scan
-                  - dynamodb:GetItem
-                  - dynamodb:PutItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:DeleteItem
-                Resource:
-                  - !GetAtt ProductsTable.Arn
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: "*"
 
 Outputs:
-  ProductImagesBucketName:
+  CognitoUserPoolId:
+    Description: "Cognito User Pool ID"
+    Value: !Ref UserPool
+
+  S3BucketName:
+    Description: "S3 Bucket for storing product images"
     Value: !Ref ProductImagesBucket
-    Description: "S3 Bucket for product images"
+
+  LambdaFunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt OrderProcessingLambda.Arn
+
+  SNSOrderTopic:
+    Description: "SNS Topic for Order Notifications"
+    Value: !Ref OrderNotifications
 
   GraphQLAPIEndpoint:
+    Description: "AppSync GraphQL API Endpoint"
     Value: !GetAtt GraphQLAPI.GraphQLUrl
-    Description: "GraphQL API Endpoint"
 
-  CognitoUserPoolId:
-    Value: !Ref UserPool
-    Description: "Cognito User Pool ID"
-
-  OrderNotificationTopicARN:
-    Value: !Ref OrderNotificationTopic
-    Description: "SNS Topic ARN for Order Notifications"
+  AmplifyAppUrl:
+    Description: "Amplify App URL"
+    Value: !Sub "https://${AmplifyApp}.amplifyapp.com"
